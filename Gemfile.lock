@@ -110,6 +110,7 @@ GEM
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
     crass (1.0.6)
+    csv (3.3.4)
     date (3.4.1)
     debug (1.10.0)
       irb (~> 1.10)
@@ -127,11 +128,14 @@ GEM
     drb (2.2.1)
     erubi (1.13.1)
     execjs (2.10.0)
+    geocoder (1.8.5)
+      base64 (>= 0.1.0)
+      csv (>= 3.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    importmap-rails (2.1.0)
+    importmap-rails (1.2.3)
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
@@ -313,7 +317,8 @@ DEPENDENCIES
   debug
   devise
   dotenv-rails
-  importmap-rails
+  geocoder
+  importmap-rails (~> 1.2.3)
   jbuilder
   pg (~> 1.1)
   puma (>= 5.0)

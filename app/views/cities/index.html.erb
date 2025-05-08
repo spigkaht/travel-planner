@@ -1,9 +1,16 @@
 <ul>
   <% if @cities %>
     <% @cities.each do |city| %>
-      <li><%= city.name %> | <%= city.country %> | <%= link_to "Show City", city %></li>
+      <li><%= city.name %> | <%= city.country %> | <%= city.address %> | <%= link_to "Show City", city %></li>
     <% end %>
   <% end %>
+
   <%= link_to "Create new city", new_city_path, class: "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" %>
   <%= link_to "Back to Planner", planner_path, class: "bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded" %>
 </ul>
+
+<div style="width: 100%; height: 600px;"
+  data-controller="map"
+  data-map-markers-value="<%= @markers.to_json %>"
+  data-map-api-key-value="<%= ENV['MAPBOX_MAP_API_KEY'] %>">
+</div>
