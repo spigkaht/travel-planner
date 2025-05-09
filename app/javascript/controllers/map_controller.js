@@ -4,44 +4,68 @@ import mapboxgl from 'mapbox-gl'
 export default class extends Controller {
   static values = {
     apiKey: String,
-    markers: Array
-  }
+    markers: Array,
+    isPlannerMap: Boolean
+  };
 
   connect() {
-    mapboxgl.accessToken = this.apiKeyValue
-
-    this.map = new mapboxgl.Map({
-      container: this.element,
-      style: "mapbox://styles/mapbox/streets-v10"
-    })
-
-    this.map.on('load', () => {
-      this.#addMarkersToMap()
-      this.#fitMapToMarkers()
-      this.#addRouteToMap()
-    })
-
-    this.map.on('click', (e) => {
-      const { lng, lat } = e.lngLat;
-      this.#reverseGeocodeAndAddCity(lat, lng);
+    this.element.addEventListener('cities:orderUpdated', (event) => {
+      this.#updateRoute(event.detail.ids);
     });
+
+    this.element.innerHTML = "";
+
+    if (!mapboxgl.supported()) {
+      alert('Your browser does not support Mapbox GL');
+    } else {
+      mapboxgl.accessToken = this.apiKeyValue;
+      this.map = new mapboxgl.Map({
+        container: this.element,
+        style: "mapbox://styles/mapbox/streets-v12"
+      });
+
+      console.log("MAP GENERATION PROCEEDING");
+
+      this.map.addControl(new mapboxgl.NavigationControl());
+      this.map.doubleClickZoom.disable();
+
+      this.map.on('load', () => {
+        this.#addMarkersToMap();
+        this.#fitMapToMarkers();
+        console.log("MAP LOADED");
+        console.log("is planner map? ", this.isPlannerMapValue);
+        if (this.isPlannerMapValue) {
+          this.#addRouteToMap()
+        };
+      });
+
+      this.map.on('dblclick', (e) => {
+        const { lng, lat } = e.lngLat;
+        this.#reverseGeocodeAndAddCity(lat, lng);
+      });
+
+      const parentElement = this.element.closest('.parent-class'); // Use the same shared parent class
+      parentElement.addEventListener('cities:orderUpdated', (event) => {
+        this.#updateRoute(event.detail.ids);
+      });
+    }
   }
 
   #addMarkersToMap() {
     this.markersValue.forEach((marker) => {
-      const popup = new mapboxgl.Popup().setHTML(marker.info_window_html)
+      const popup = new mapboxgl.Popup().setHTML(marker.info_window_html);
       new mapboxgl.Marker()
         .setLngLat([ marker.lng, marker.lat ])
         .setPopup(popup)
-        .addTo(this.map)
-    })
-  }
+        .addTo(this.map);
+    });
+  };
 
   #fitMapToMarkers() {
-    const bounds = new mapboxgl.LngLatBounds()
-    this.markersValue.forEach(marker => bounds.extend([ marker.lng, marker.lat ]))
-    this.map.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 0 })
-  }
+    const bounds = new mapboxgl.LngLatBounds();
+    this.markersValue.forEach(marker => bounds.extend([ marker.lng, marker.lat ]));
+    this.map.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 0 });
+  };
 
   #addRouteToMap() {
     if (this.markersValue.length < 2) return;
@@ -52,11 +76,9 @@ export default class extends Controller {
     fetch(url)
       .then(response => response.json())
       .then(data => {
-        console.log("Data: ", data);
-
-        const steps = data.routes[0].legs[0].steps;
-        const instructions = steps.map(step => step.maneuver.instruction);
-        console.log(instructions); // Or render these in a sidebar, modal, etc.
+        // const steps = data.routes[0].legs[0].steps;
+        // const instructions = steps.map(step => step.maneuver.instruction);
+        // console.log(instructions); // Or render these in a sidebar, modal, etc.
 
         const route = data.routes[0].geometry;
 
@@ -82,6 +104,52 @@ export default class extends Controller {
           }
         });
       });
+  };
+
+  #updateRoute(ids) {
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${this.#getCoordinatesForCities(ids)}?geometries=geojson&overview=full&steps=true&access_token=${this.apiKeyValue}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const route = data.routes[0].geometry;
+
+        // If a route layer already exists, remove it
+        if (this.map.getLayer('route')) {
+          this.map.removeLayer('route');
+          this.map.removeSource('route');
+        }
+
+        // Add the new route layer
+        this.map.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: route
+          }
+        });
+
+        this.map.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': '#007aff',
+            'line-width': 4
+          }
+        });
+      });
+  }
+
+  #getCoordinatesForCities(ids) {
+    return ids.map(id => {
+      const city = this.markersValue.find(city => city.id === parseInt(id));
+      return `${city.lng},${city.lat}`;
+    }).join(';');
   }
 
   #reverseGeocodeAndAddCity(lat, lng) {
@@ -103,7 +171,7 @@ export default class extends Controller {
           this.#createCityOnServer(name, country, lat, lng);
         }
       });
-  }
+  };
 
   #createCityOnServer(name, country, lat, lng) {
     fetch("/cities", {
@@ -129,5 +197,5 @@ export default class extends Controller {
         alert("Failed to add city.");
       }
     });
-  }
+  };
 }
