@@ -1,11 +1,17 @@
 <div class="h-screen flex">
-  <div class="flex flex-col justify-center w-10 hover:w-28 transition-all duration-1000 px-2 bg-gray-200 text-2xl text-center">
-    <p>G</p>
-    <p>L</p>
-    <p>O</p>
-    <p>B</p>
-    <p>A</p>
-    <p>L</p>
+  <div class="group flex flex-col justify-center w-10 hover:w-28 transition-all duration-1000 px-2 bg-gray-200 text-2xl text-center">
+    <div class="hidden group-hover:flex">
+      <%= icon "plane-alt", variant: "solid" %>
+      <%= icon "plane-alt", variant: "solid" %>
+    </div>
+    <div class="group-hover:hidden">
+      <p>G</p>
+      <p>L</p>
+      <p>O</p>
+      <p>B</p>
+      <p>A</p>
+      <p>L</p>
+    </div>
   </div>
   <div class="flex flex-col justify-center w-10 hover:w-28 transition-all duration-1000 bg-gray-100 px-2 text-2xl text-center">
     <p>T</p>
@@ -17,9 +23,11 @@
     <div data-controller="list-sort" data-list-sort-url-value="<%= sort_cities_path %>">
       <ul data-list-sort-target="list">
         <% @cities.each do |city| %>
-          <li data-id="<%= city.id %>" class="cursor-grab active:cursor-grabbing my-2">
-            <%= city.address %>
+          <li data-id="<%= city.id %>" class="flex justify-between w-100 cursor-grab active:cursor-grabbing my-2">
+            <p><%= city.address %></p>
+            <%= link_to "x", city_path(city), data: {turbo_method: :delete} %>
           </li>
+          <p data-duration></p>
         <% end %>
       </ul>
     </div>

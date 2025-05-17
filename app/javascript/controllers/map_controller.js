@@ -81,6 +81,14 @@ export default class extends Controller {
         // console.log(instructions); // Or render these in a sidebar, modal, etc.
 
         const route = data.routes[0].geometry;
+        const legs = data.routes[0].legs
+
+        this.#updateDurationsInDOM(legs);
+
+        if (this.map.getLayer('route')) {
+          this.map.removeLayer('route');
+          this.map.removeSource('route');
+        }
 
         this.map.addSource('route', {
           type: 'geojson',
@@ -150,6 +158,19 @@ export default class extends Controller {
       const city = this.markersValue.find(city => city.id === parseInt(id));
       return `${city.lng},${city.lat}`;
     }).join(';');
+  }
+
+  #updateDurationsInDOM(legs) {
+    const durationElements = document.querySelectorAll('[data-duration]');
+
+    legs.forEach((leg, index) => {
+      const durationInHours = Math.round(leg.duration / 3600)
+      const durationInMinutes = leg.duration - durationInHours;
+      const el = durationElements[index];
+      if (el) {
+        el.textContent = `| ${durationInHours}:${durationInMinutes}`;
+      }
+    });
   }
 
   #reverseGeocodeAndAddCity(lat, lng) {

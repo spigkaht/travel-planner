@@ -1,4 +1,6 @@
 class CitiesController < ApplicationController
+  before_action :set_city, only: [:show, :edit, :update, :destroy]
+
   def index
     @cities = City.order(:order)
 
@@ -15,7 +17,6 @@ class CitiesController < ApplicationController
   end
 
   def show
-    @city = City.find(params[:id])
   end
 
   def new
@@ -37,6 +38,19 @@ class CitiesController < ApplicationController
     end
   end
 
+  def edit
+  end
+
+  def update
+    @city.update(city_params)
+    redirect_to planner_path
+  end
+
+  def destroy
+    @city.destroy
+    redirect_to planner_path, status: :see_other
+  end
+
   def sort
     params[:order].each_with_index do |id, index|
       City.where(id: id).update_all(order: index + 1)
@@ -49,5 +63,9 @@ class CitiesController < ApplicationController
 
   def city_params
     params.require(:city).permit(:name, :country, :longitude, :latitude, :order)
+  end
+
+  def set_city
+    @city = City.find(params[:id])
   end
 end
