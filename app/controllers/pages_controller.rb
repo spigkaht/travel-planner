@@ -1,10 +1,11 @@
 class PagesController < ApplicationController
-  # skip_before_action :authenticate_user!, only: [:index, :planner]
+  skip_before_action :authenticate_user!, only: [:index]
 
   def index
   end
 
   def planner
+    @trip = Trip.first
     @cities = City.order(:order)
 
     if @cities

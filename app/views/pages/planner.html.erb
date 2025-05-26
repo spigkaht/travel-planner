@@ -1,10 +1,16 @@
 <div class="h-screen flex">
-  <div class="group flex flex-col justify-center w-10 hover:w-28 transition-all duration-1000 px-2 bg-gray-200 text-2xl text-center">
-    <div class="hidden group-hover:flex">
-      <%= icon "plane-alt", variant: "solid" %>
-      <%= icon "plane-alt", variant: "solid" %>
+  <div class="relative group flex flex-col justify-center w-10 hover:w-28 transition-all duration-1000 px-2 bg-gray-200 text-2xl text-center">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 mx-auto translate-left-1/2 transition-opacity duration-1000 opacity-0 group-hover:opacity-100">
+      <p class="mt-2">trips</p>
+      <%= link_to planner_path do %>
+        <%= icon "plane-alt", variant: "solid", class: "w-12 h-12 mt-4 hover:text-color-red" %>
+      <% end %>
+      <%= link_to planner_path do %>
+        <%= icon "plane-alt", variant: "solid", class: "w-12 h-12 mt-4 hover:text-color-red" %>
+      <% end %>
+      <%= link_to "SO", destroy_user_session_path, data: { turbo_method: :delete, confirm: "Sign out really?" } %>
     </div>
-    <div class="group-hover:hidden">
+    <div class="transition-opacity duration-1000 opacity-100 group-hover:opacity-0">
       <p>G</p>
       <p>L</p>
       <p>O</p>
